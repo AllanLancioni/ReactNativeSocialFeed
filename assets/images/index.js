@@ -1,0 +1,1 @@
+export const EndlessConstellation = require('./endless-constellation.png')
