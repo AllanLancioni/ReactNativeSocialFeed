@@ -9,8 +9,9 @@ import Account from './screens/Account'
 import Login from './screens/Login'
 import SignUp from './screens/SignUp'
 import { useContext } from 'react'
-import { Button, Text } from 'react-native-paper'
+import { ActivityIndicator, Text, useTheme } from 'react-native-paper'
 import TabBar from './shared/layout/TabBar'
+import { View } from 'react-native'
 
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -18,7 +19,14 @@ const Tab = createBottomTabNavigator()
 function Routes() {
 
   // Logged out routes
-  const { user } = useContext(AuthContext)
+  const { user, loading } = useContext(AuthContext)
+  const { colors } = useTheme()
+
+  if (loading) return (
+    <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
+      <ActivityIndicator size={160} animating={true} color={colors.primary} />
+    </View>
+  )
 
   if (!user) return (
     <NavigationContainer>

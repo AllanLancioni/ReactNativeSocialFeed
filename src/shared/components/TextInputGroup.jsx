@@ -4,13 +4,14 @@ import FormError from "./FormError"
 import { useState } from "react"
 import { TextInput } from 'react-native-paper'
 
-function TextInputGroup({ name, label, secureTextEntry }) {
+function TextInputGroup({ name, label, secureTextEntry, dark = false }) {
 
   const { control } = useFormContext()
   const [isSecure, setIsSecure] = useState(secureTextEntry)
+  const color = dark ? 'white' : undefined
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, ]}>
       <Controller
         name={name}
         control={control}
@@ -21,10 +22,10 @@ function TextInputGroup({ name, label, secureTextEntry }) {
             value={value}            
             onBlur={onBlur}            
             style={{ backgroundColor: 'rgba(255,255,255,.1)' }}
-            textColor="white"
+            textColor={color}
             placeholderTextColor="gray"
             onChangeText={value => onChange(value)}    
-            right={secureTextEntry && <TextInput.Icon color={focused => focused ? "white" : "gray"} icon="eye" onPress={() => setIsSecure(v => !v)} />}
+            right={secureTextEntry && <TextInput.Icon color={focused => focused ? color : "gray"} icon="eye" onPress={() => setIsSecure(v => !v)} />}
             secureTextEntry={isSecure}
           />
         )}

@@ -1,17 +1,21 @@
-import { useContext } from "react"
 import { StyleSheet, ImageBackground, View } from "react-native"
-import { AuthContext } from "../contexts/AuthContext"
 import { useForm, FormProvider } from "react-hook-form"
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 import TextInputGroup from "../shared/components/TextInputGroup"
 import { EndlessConstellation } from "../../assets/images"
 import { Button, Divider, Text, useTheme } from 'react-native-paper'
+import { signInWithEmailAndPassword } from "firebase/auth"
+import Toast from 'react-native-toast-message'
+import { useState } from "react"
+import { handleError } from "../helpers/errors-handler"
+import { auth } from "../../firebase"
 
 const schema = yup.object().shape({
-  username: yup
+  email: yup
     .string()
-    .required('O username não pode ser vazio'),
+    .required('O email não pode ser vazio!')
+    .email('Formato de email inválido!'),
   password: yup
     .string()
     .required('A senha não pode ser vazia')
@@ -19,48 +23,43 @@ const schema = yup.object().shape({
 }).required()
 
 function Login({ navigation }) {
+  const [loading, setLoading] = useState(false)
   const theme = useTheme()
-
   const methods = useForm({
     resolver: yupResolver(schema), reValidateMode: 'onSubmit',
     mode: 'onBlur'
   })
-  const { handleSubmit, register } = methods
-  // const { login, user } = useContext(AuthContext)
 
-  const onSubmit = (value) => {
-
-    console.log('value', value)
-
-    // login(value)
-    //   .then(() => navigation.navigate('Home'))
-    //   .catch(err => console.error(err))
+  
+  const login = async ({email, password}) => {
+    setLoading(true)
+    try {
+      await signInWithEmailAndPassword(auth, email, password)
+    } catch (error) {
+      console.log(error)
+      Toast.show({ type: 'error', text1: 'Erro!', text2: handleError(error.code) })
+    } finally {
+      setLoading(false)
+    }
   }
+
 
   return (
     <View style={{ flex: 1 }}>
       <ImageBackground source={EndlessConstellation} resizeMode="cover" style={styles.image}>
         <FormProvider {...methods}>
           <Text variant="displayLarge" style={styles.title}>MyApp</Text>
-          <TextInputGroup
-            label="Username"
-            register={register}
-            name="username"
-          />
-          <TextInputGroup
-            label="Password"
-            register={register}
-            name="password"
-            secureTextEntry={true}
-          />
-          
+          <TextInputGroup dark label="Email" name="email" />
+          <TextInputGroup dark label="Password" name="password" secureTextEntry={true} />
         </FormProvider>
         <Button
             mode="contained"
             buttonColor={theme.colors.secondary} 
             style={{ marginTop: 8 }}
-            uppercase   
-            onPress={handleSubmit(onSubmit)}>
+            uppercase
+            loading={loading}   
+            // disabled={loading}
+            onPress={methods.handleSubmit(login)}>
               Entrar
           </Button>
         <Divider style={{ marginVertical: 18 }} />
